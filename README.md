@@ -4,6 +4,21 @@ A typographic, journal/magazine [Pollora](https://pollora.dev) theme, built in W
 Site Editing** (block theme) mode: real `templates/*.html` and `parts/*.html`, editable in the Site
 Editor, instead of Pollora's usual Blade-based template hierarchy.
 
+## Use it
+
+Buzz is one of the templates of `pollora:make:theme`:
+
+```bash
+php artisan pollora:make:theme my-journal   # then choose "Magazine"
+# or, without the prompt
+php artisan pollora:make:theme my-journal --repository=Pollora/theme-buzz
+```
+
+This repository is that template: its files carry `%theme_name%`, `%theme_namespace%`… which the
+command substitutes, so the pattern slugs (`my-journal/masthead`), the namespace
+(`Theme\MyJournal`) and the `style.css` header are the new theme's own. The design's vocabulary
+— the `buzz-*` classes, the `buzz_card` image size — keeps its name.
+
 ## Why a block theme, in a Blade-first framework
 
 Pollora normally resolves every page through its own Blade template hierarchy, and its guidance is
@@ -77,16 +92,23 @@ edge everywhere) are the design system itself, authored by hand.
 
 ## Local development
 
+Develop on a theme generated from this template, never in this repository — its placeholders do
+not run:
+
 ```bash
-npm install
-npm run dev    # HMR
-npm run build  # Writes public/build/theme/<theme-folder-name>/…
+php artisan pollora:make:theme buzz --repository=Pollora/theme-buzz   # in a test project
+cd themes/buzz && npm install && npm run dev
+# … then package the changes back into this repository:
+./bin/package-theme.sh /path/to/project/themes/buzz
+git diff   # review: only buzz/, Theme\Buzz and the style.css header become placeholders
 ```
 
-The build's output folder name is derived from the theme's own directory name on disk — so build
-from the path WordPress actually serves the theme from (`wp-content/themes/<slug>`), not from a
-symlink or a clone under a different name: Node resolves `__dirname` to the real path, and a
-mismatch there breaks every asset and font URL silently.
+The build's output folder is named after the theme's directory on disk, so build from where
+WordPress serves the theme (`themes/<slug>`), not from a symlink: Node resolves `__dirname` to the
+real path, and a mismatch breaks every asset and font URL silently.
+
+`bin/` is dropped by the scaffolder. It holds the packaging script, `bin/ci/install.php` (the
+commit under test, substituted as `make:theme` would — what CI installs) and the browser tests.
 
 ## Status
 

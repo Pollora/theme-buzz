@@ -1,8 +1,8 @@
 <?php
 /**
  * Title: Not found
- * Slug: buzz/not-found
- * Categories: buzz/patterns
+ * Slug: %theme_name%/not-found
+ * Categories: %theme_name%/patterns
  * Inserter: false
  */
 ?>

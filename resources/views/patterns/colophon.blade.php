@@ -1,7 +1,7 @@
 {{--
   Title: Colophon
-  Slug: buzz/colophon
-  Categories: buzz/patterns
+  Slug: %theme_name%/colophon
+  Categories: %theme_name%/patterns
   Block Types: core/template-part/footer
   Inserter: false
 --}}

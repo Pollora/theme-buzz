@@ -1,8 +1,8 @@
 <?php
 /**
  * Title: Journal index list
- * Slug: buzz/index-list
- * Categories: buzz/patterns
+ * Slug: %theme_name%/index-list
+ * Categories: %theme_name%/patterns
  * Inserter: false
  */
 ?>

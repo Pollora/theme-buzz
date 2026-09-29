@@ -1,8 +1,8 @@
 <?php
 /**
  * Title: Article
- * Slug: buzz/article
- * Categories: buzz/patterns
+ * Slug: %theme_name%/article
+ * Categories: %theme_name%/patterns
  * Inserter: false
  */
 ?>

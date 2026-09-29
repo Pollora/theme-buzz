@@ -18,6 +18,41 @@ permissions:
   contents: read
 
 jobs:
+  # The template as a user receives it, generated under another slug: no
+  # placeholder left, no concrete name left, PHP that parses. No site needed.
+  contract:
+    name: Contract
+    runs-on: ubuntu-latest
+
+    if: github.repository == 'Pollora/theme-buzz'
+
+    steps:
+      - name: Checkout the theme
+        uses: actions/checkout@v6
+
+      - name: Generate the theme under another slug
+        run: php bin/ci/install.php --source="$PWD" --themes="$RUNNER_TEMP" --slug=my-journal
+
+      - name: Every placeholder is substituted
+        run: |
+          if grep -rn '%theme_[a-z_]*%' "$RUNNER_TEMP/my-journal"; then
+            echo "::error::a placeholder the scaffolder does not substitute is left (see bin/replacements.php)"
+            exit 1
+          fi
+
+      # The slug is the only concrete name in the template: a buzz/ left in a
+      # pattern slug or a handle collides with another theme generated from it.
+      - name: No concrete theme name is left
+        run: |
+          # README.md documents the template itself, and names it on purpose.
+          if grep -rn --exclude=README.md 'buzz/\|Theme\\Buzz' "$RUNNER_TEMP/my-journal"; then
+            echo "::error::a concrete theme name is left; use %theme_name% / %theme_namespace%"
+            exit 1
+          fi
+
+      - name: PHP parses
+        run: find "$RUNNER_TEMP/my-journal" -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
   browser:
     name: Browser (framework ${{ matrix.framework }})
     runs-on: ubuntu-latest
@@ -124,14 +159,13 @@ jobs:
             --no-interaction || true
           ddev exec wp core is-installed
 
-      # The commit under test, copied as it is: Buzz carries no scaffolding
-      # placeholders. The directory name matters — the Vite build folder is
-      # named after it.
+      # The commit under test, with its placeholders substituted as
+      # pollora:make:theme would (bin/ci/install.php). The directory name
+      # matters — the Vite build folder is named after it.
       - name: Install and build the theme
         working-directory: site
         run: |
-          cp -r ../theme themes/buzz
-          rm -rf themes/buzz/.git themes/buzz/bin themes/buzz/.github
+          php ../theme/bin/ci/install.php --source="$PWD/../theme" --themes="$PWD/themes" --slug=buzz
           ddev exec bash -c 'cd themes/buzz && npm install --no-audit --no-fund && npm run build'
           ddev exec wp theme activate buzz
           ddev exec wp rewrite flush
