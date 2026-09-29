@@ -1,9 +1,11 @@
-<!--
-Title: Journal index list
-Slug: buzz/index-list
-Categories: buzz/patterns
-Inserter: false
--->
+<?php
+/**
+ * Title: Journal index list
+ * Slug: buzz/index-list
+ * Categories: buzz/patterns
+ * Inserter: false
+ */
+?>
 <!-- wp:group {"tagName":"main","align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|lg","bottom":"var:preset|spacing|lg"}}},"layout":{"type":"constrained","contentSize":"46rem"}} -->
 <main class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--lg);margin-bottom:var(--wp--preset--spacing--lg)">
     <!-- wp:query-title {"type":"archive"} /-->

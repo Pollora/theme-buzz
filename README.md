@@ -27,13 +27,15 @@ buzz/
 │   ├── page.html
 │   └── 404.html
 ├── parts/                # header.html / footer.html, each delegating to a pattern too
+├── patterns/              # Static patterns, registered by WordPress itself
+│   ├── masthead.php       # The actual header markup
+│   ├── index-list.php     # The journal index: a post loop, large titles, hairline rules
+│   ├── article.php        # A single post's body, plus comments
+│   ├── page-body.php      # A plain page's body
+│   ├── not-found.php      # The 404 message
+│   └── design-system.php  # Every native block, styled — offered in the inserter
 ├── resources/views/patterns/
-│   ├── masthead.html      # The actual header markup — no PHP needed
-│   ├── colophon.blade.php # The footer — Blade, for the one thing that needs real PHP: the year
-│   ├── index-list.html    # The journal index: a post loop, large titles, hairline rules
-│   ├── article.html       # A single post's body, plus comments
-│   ├── page-body.html     # A plain page's body
-│   └── not-found.html     # The 404 message
+│   └── colophon.blade.php # The footer — Blade, for the one thing that needs real PHP: the year
 ├── theme.json             # The design system: palette, the two-family type scale, spacing, styles
 ├── resources/assets/
 │   ├── css/app.css        # @theme static tokens (colour only — see below) + the few hand-authored rules
@@ -41,10 +43,19 @@ buzz/
 └── app/Providers/AssetServiceProvider.php
 ```
 
-A theme's `resources/views/patterns` can hold both `.blade.php` (compiled, for real PHP) and plain
-`.html` files (used verbatim, for a pattern that needs none) — most of Buzz's patterns are plain
-`.html`, since a block theme's patterns are mostly static block markup once the dynamic blocks
-(`post-title`, `post-content`, `post-terms`…) are doing the work themselves.
+One rule decides where a file goes: **the theme root holds what WordPress reads itself**
+(`templates/`, `parts/`, `patterns/`, `theme.json`, `style.css` — the layout the Site Editor exports
+too), and **`resources/views/` holds Blade, compiled by Pollora**.
+
+So a static pattern is a native WordPress one, `patterns/*.php`: block markup under a header
+docblock (`Title`, `Slug`, `Categories`…). Most of Buzz's patterns are, since the dynamic blocks
+(`post-title`, `post-content`, `post-terms`…) do the work themselves. A pattern that needs Laravel
+— the colophon's year, here — is a Blade view in `resources/views/patterns/*.blade.php`, registered
+by Pollora.
+
+WordPress caches the list of a theme's `patterns/` files: a new file shows up once that cache is
+cleared (`wp eval 'wp_get_theme()->delete_pattern_cache();'`), or at once with
+`WP_DEVELOPMENT_MODE=theme`.
 
 ## Design system
 
@@ -82,4 +93,4 @@ mismatch there breaks every asset and font URL silently.
 A first, deliberately simple version: six templates, six patterns, no style variations. See
 [`Pollora/framework`](https://github.com/Pollora/framework) for the FSE support this theme relies
 on, and the framework's changelog for the two fixes this theme's construction found and fixed
-(`.html` block patterns, a block theme's `404.html` answering the right HTTP status).
+(a block theme's `404.html` answering the right HTTP status, its `error404` body class).
