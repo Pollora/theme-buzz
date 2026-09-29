@@ -1,9 +1,11 @@
-<!--
-Title: Design system
-Slug: buzz/design-system
-Categories: buzz/patterns
-Inserter: true
--->
+<?php
+/**
+ * Title: Design system
+ * Slug: buzz/design-system
+ * Categories: buzz/patterns
+ * Inserter: true
+ */
+?>
 <!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"var:preset|spacing|lg"}},"layout":{"type":"constrained","contentSize":"42rem"}} -->
 <div class="wp-block-group alignwide">
 
