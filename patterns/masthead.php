@@ -1,8 +1,8 @@
 <?php
 /**
  * Title: Masthead
- * Slug: buzz/masthead
- * Categories: buzz/patterns
+ * Slug: %theme_name%/masthead
+ * Categories: %theme_name%/patterns
  * Block Types: core/template-part/header
  * Inserter: false
  */

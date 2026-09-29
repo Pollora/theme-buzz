@@ -17,8 +17,8 @@ return [
         |
         */
         'patterns' => [
-            'buzz/patterns' => [
-                'label' => 'Buzz',
+            '%theme_name%/patterns' => [
+                'label' => '%theme_name%',
             ],
         ],
     ],

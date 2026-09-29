@@ -1,8 +1,8 @@
 <?php
 /**
  * Title: Design system
- * Slug: buzz/design-system
- * Categories: buzz/patterns
+ * Slug: %theme_name%/design-system
+ * Categories: %theme_name%/patterns
  * Inserter: true
  */
 ?>
