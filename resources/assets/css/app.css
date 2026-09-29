@@ -40,6 +40,23 @@
 
 }
 
+/*
+ * A short page (a stub article, an empty archive) must not leave the
+ * colophon stranded mid-viewport: WordPress prints the header, the main
+ * content and the footer as siblings under `.wp-site-blocks`, so the fix is
+ * the classic sticky-footer flex column — the content pattern's own <main>
+ * is the one growing child, per its `flex-grow` below.
+ */
+.wp-site-blocks {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.wp-site-blocks > main {
+    flex: 1 0 auto;
+}
+
 /* Hand-authored, non-core pieces of the masthead and colophon patterns. */
 .buzz-masthead {
     border-bottom: 1px solid var(--color-rule);
