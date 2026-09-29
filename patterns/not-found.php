@@ -1,9 +1,11 @@
-<!--
-Title: Not found
-Slug: buzz/not-found
-Categories: buzz/patterns
-Inserter: false
--->
+<?php
+/**
+ * Title: Not found
+ * Slug: buzz/not-found
+ * Categories: buzz/patterns
+ * Inserter: false
+ */
+?>
 <!-- wp:group {"tagName":"main","align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|xl","bottom":"var:preset|spacing|xl"}}},"layout":{"type":"constrained","contentSize":"36rem"}} -->
 <main class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--xl);margin-bottom:var(--wp--preset--spacing--xl)">
     <!-- wp:heading {"level":1,"fontSize":"article-title"} -->
