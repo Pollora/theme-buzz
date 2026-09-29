@@ -1,0 +1,191 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+      - 'fix/**'
+      - 'ci/**'
+  pull_request:
+  schedule:
+    # Nightly: this repository ships by tag, so a framework released after this
+    # theme was tagged can break it without a single commit landing here.
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    name: Browser (framework ${{ matrix.framework }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    if: github.repository == 'Pollora/theme-buzz'
+
+    # locked: the framework a new project installs, which is the skeleton's lock.
+    # develop: the next framework release, before it ships.
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [locked, develop]
+
+    steps:
+      - name: Checkout the theme
+        uses: actions/checkout@v6
+        with:
+          path: theme
+
+      - name: Setup DDEV
+        uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
+
+      # Pinned to the beta on purpose: with no version, create-project installs
+      # the last *stable* skeleton (v13.4.0), which predates block-theme support.
+      - name: Create the skeleton
+        run: |
+          composer create-project pollora/pollora site '^13.32@beta' \
+            --no-install --no-scripts --no-interaction
+
+      - name: Configure DDEV
+        working-directory: site
+        run: |
+          ddev config \
+            --project-name=buzz-ci \
+            --project-type=wordpress \
+            --docroot=public \
+            --php-version=8.4 \
+            --webserver-type=apache-fpm \
+            --database=mariadb:10.11 \
+            --nodejs-version=22 \
+            --disable-settings-management
+
+      - name: Start DDEV
+        working-directory: site
+        run: ddev start
+
+      - name: Prepare .env
+        working-directory: site
+        run: |
+          cp .env.example .env
+          sed -i \
+            -e 's#^APP_URL=.*#APP_URL=https://buzz-ci.ddev.site#' \
+            -e 's#^DB_CONNECTION=.*#DB_CONNECTION=mysql#' \
+            -e 's/^# DB_HOST=.*/DB_HOST=db/' \
+            -e 's/^# DB_PORT=.*/DB_PORT=3306/' \
+            -e 's/^# DB_DATABASE=.*/DB_DATABASE=db/' \
+            -e 's/^# DB_USERNAME=.*/DB_USERNAME=db/' \
+            -e 's/^# DB_PASSWORD=.*/DB_PASSWORD=db/' \
+            .env
+
+      - name: Install Composer dependencies
+        working-directory: site
+        run: ddev composer install --no-interaction --no-progress
+
+      - name: Use framework develop
+        if: matrix.framework == 'develop'
+        working-directory: site
+        run: ddev composer require pollora/framework:dev-develop --with-all-dependencies --no-interaction --no-progress
+
+      - name: Generate application key
+        working-directory: site
+        run: ddev exec php artisan key:generate --no-interaction
+
+      # --no-scripts: this only replaces core files, and the skeleton's
+      # post-autoload-dump hook opens a database connection that has no TTY to
+      # fall back on.
+      - name: Use the latest WordPress
+        working-directory: site
+        run: |
+          ddev composer update johnpbloch/wordpress --with-all-dependencies \
+            --no-scripts --no-interaction --no-progress
+
+      - name: Check the WordPress core is complete
+        working-directory: site
+        run: |
+          ddev exec test -f public/cms/wp-includes/l10n.php \
+            || { echo "::error::WordPress core is incomplete — wp-includes is missing."; exit 1; }
+          ddev exec wp core version
+
+      - name: Install WordPress
+        working-directory: site
+        run: |
+          ddev exec php artisan pollora:install --install \
+            --title="Buzz CI" \
+            --description="Pollora theme-buzz CI" \
+            --admin-user=admin \
+            --admin-email=admin@example.com \
+            --admin-password=buzz-ci \
+            --locale=en_US \
+            --public=false \
+            --no-interaction || true
+          ddev exec wp core is-installed
+
+      # The commit under test, copied as it is: Buzz carries no scaffolding
+      # placeholders. The directory name matters — the Vite build folder is
+      # named after it.
+      - name: Install and build the theme
+        working-directory: site
+        run: |
+          cp -r ../theme themes/buzz
+          rm -rf themes/buzz/.git themes/buzz/bin themes/buzz/.github
+          ddev exec bash -c 'cd themes/buzz && npm install --no-audit --no-fund && npm run build'
+          ddev exec wp theme activate buzz
+          ddev exec wp rewrite flush
+
+      - name: Fetch the framework's browser test harness
+        working-directory: site
+        run: |
+          # develop is aliased (13.x-dev), so dev-develop is not always the first version listed.
+          ref=$(ddev composer show pollora/framework --format=json \
+            | jq -r '.versions | if index("dev-develop") then "develop" else .[0] end')
+          echo "Harness from pollora/framework@$ref"
+          git clone --quiet --depth 1 --branch "$ref" https://github.com/Pollora/framework.git ../framework
+          mkdir -p ../framework/tests/e2e/specs/buzz
+          cp ../theme/bin/tests/e2e/*.spec.ts ../framework/tests/e2e/specs/buzz/
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Install the browser tests
+        working-directory: framework/tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Trust the site's certificate
+        run: |
+          if command -v mkcert >/dev/null && [ -f "$(mkcert -CAROOT)/rootCA.pem" ]; then
+            echo "NODE_EXTRA_CA_CERTS=$(mkcert -CAROOT)/rootCA.pem" >> "$GITHUB_ENV"
+          else
+            echo "::warning::No mkcert authority on the runner; certificate checks are off for this disposable site"
+            echo "NODE_TLS_REJECT_UNAUTHORIZED=0" >> "$GITHUB_ENV"
+          fi
+
+      - name: Browser tests
+        working-directory: framework/tests/e2e
+        env:
+          E2E_HOME_URL: https://buzz-ci.ddev.site
+          E2E_SITE_DIR: ${{ github.workspace }}/site
+          E2E_RUN_ID: ${{ github.run_id }}
+        run: npx playwright test specs/buzz
+
+      - name: Upload the browser test report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-report-${{ matrix.framework }}
+          path: |
+            framework/tests/e2e/playwright-report
+            framework/tests/e2e/test-results
+          if-no-files-found: ignore
+
+      - name: Laravel log
+        if: failure()
+        working-directory: site
+        run: tail -n 200 storage/logs/laravel.log || true

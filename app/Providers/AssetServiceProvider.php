@@ -22,6 +22,7 @@ class AssetServiceProvider extends ServiceProvider
         Asset::add('buzz/script', 'app.js')
             ->container('theme')
             ->toFrontend()
+            ->loadInFooter()
             ->useVite();
     }
 }
