@@ -37,7 +37,7 @@ buzz/
 ├── theme.json             # The design system: palette, the two-family type scale, spacing, styles
 ├── resources/assets/
 │   ├── css/app.css        # @theme static tokens (colour only — see below) + the few hand-authored rules
-│   └── fonts/              # Self-hosted Fraunces + Source Serif 4 (OFL, Google Fonts, latin subset)
+│   └── fonts/              # Self-hosted Playfair Display + Source Serif 4 (OFL, Google Fonts, latin subset)
 └── app/Providers/AssetServiceProvider.php
 ```
 
@@ -53,7 +53,7 @@ One committed editorial direction — ink on newsprint, one accent used sparingl
 - **Palette**: `paper` (warm off-white), `ink` (near-black), `caption` (muted grey), `rule`
   (hairline), `rubric` (a restrained editorial red — kickers, the masthead rule, a link on hover;
   never a colour field).
-- **Type**: Fraunces (display, variable, an optical-size axis for real display character) +
+- **Type**: Playfair Display (display — high-contrast, the classic magazine masthead serif) +
   Source Serif 4 (body/UI text) — a two-family discipline, no third face. A magazine-scale, fluid
   type ladder (`caption` → `masthead`) is hand-authored in `theme.json`, not Tailwind's defaults.
 - **Rhythm**: a narrow reading column (`contentSize: 42rem`), drop caps on, a journal index list

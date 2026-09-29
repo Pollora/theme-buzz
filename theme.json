@@ -39,11 +39,6 @@
                 "snug": 1.2,
                 "body": 1.6,
                 "relaxed": 1.75
-            },
-            "opsz": {
-                "text": 12,
-                "heading": 72,
-                "display": 144
             }
         },
         "layout": {
@@ -106,23 +101,23 @@
             "writingMode": false,
             "fontFamilies": [
                 {
-                    "name": "Fraunces",
+                    "name": "Playfair Display",
                     "slug": "display",
-                    "fontFamily": "Fraunces, ui-serif, Georgia, serif",
+                    "fontFamily": "\"Playfair Display\", ui-serif, Georgia, serif",
                     "fontFace": [
                         {
-                            "fontFamily": "Fraunces",
+                            "fontFamily": "Playfair Display",
                             "fontStyle": "normal",
-                            "fontWeight": "100 900",
+                            "fontWeight": "400 900",
                             "fontDisplay": "swap",
-                            "src": ["file:./resources/assets/fonts/Fraunces-Roman.woff2"]
+                            "src": ["file:./resources/assets/fonts/PlayfairDisplay-Roman.woff2"]
                         },
                         {
-                            "fontFamily": "Fraunces",
+                            "fontFamily": "Playfair Display",
                             "fontStyle": "italic",
-                            "fontWeight": "100 900",
+                            "fontWeight": "400 900",
                             "fontDisplay": "swap",
-                            "src": ["file:./resources/assets/fonts/Fraunces-Italic.woff2"]
+                            "src": ["file:./resources/assets/fonts/PlayfairDisplay-Italic.woff2"]
                         }
                     ]
                 },

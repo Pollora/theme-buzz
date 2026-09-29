@@ -38,14 +38,6 @@
         --color-rubric: var(--wp--preset--color--rubric, oklch(48% 0.18 25));
     }
 
-    /*
-     * Fraunces carries an optical-size axis: 'opsz' 144 is what gives large
-     * display type its full character (higher contrast, ink traps) instead
-     * of the same shapes scaled up from text size.
-     */
-    .font-display {
-        font-variation-settings: "opsz" 144;
-    }
 }
 
 /* Hand-authored, non-core pieces of the masthead and colophon patterns. */
@@ -53,8 +45,10 @@
     border-bottom: 1px solid var(--color-rule);
 }
 
+/* Playfair Display's contrast is already full-strength at any size; a touch
+   of negative tracking is what a masthead needs at this scale. */
 .buzz-nameplate {
-    font-variation-settings: "opsz" 144;
+    letter-spacing: -0.01em;
 }
 
 .buzz-colophon {
