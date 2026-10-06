@@ -18,16 +18,18 @@ test.beforeAll(() => {
 
     const category = wp('term', 'create', 'category', `${tag}-cat`, '--porcelain');
     ids.post = create('--post_type=post', `--post_title=Headline ${tag}`, `--post_content=<!-- wp:paragraph --><p>Body ${tag}</p><!-- /wp:paragraph -->`, `--post_category=${category}`);
+    ids.long = create('--post_type=post', `--post_title=Long read ${tag}`, `--post_content=<!-- wp:paragraph --><p>${'word '.repeat(700)}</p><!-- /wp:paragraph -->`);
     ids.page = create('--post_type=page', `--post_title=Page ${tag}`, `--post_content=<!-- wp:paragraph --><p>Page body ${tag}</p><!-- /wp:paragraph -->`);
     ids.category = category;
 
     urls.post = link(ids.post);
+    urls.long = link(ids.long);
     urls.page = link(ids.page);
     urls.category = new URL(wp('term', 'get', 'category', category, '--field=url')).pathname;
 });
 
 test.afterAll(() => {
-    for (const key of ['post', 'page']) {
+    for (const key of ['post', 'long', 'page']) {
         if (ids[key]) {
             wp('post', 'delete', ids[key], '--force');
         }
@@ -77,6 +79,20 @@ test('a post renders its title and body', async ({ page }) => {
     await expect(page.locator('body')).toHaveClass(/\bsingle-post\b/);
     await expect(page.locator('main h1')).toContainText(`Headline ${tag}`);
     await expect(page.locator('main')).toContainText(`Body ${tag}`);
+});
+
+test('the byline says how long a post takes to read, from its own words', async ({ page }) => {
+    // 700 words at 230 a minute: the theme's own binding source, buzz/article.
+    await visit(page, urls.long);
+    await expect(page.locator('main')).toContainText('4 min read');
+
+    await visit(page, urls.post);
+    await expect(page.locator('main')).toContainText('1 min read');
+
+    // In the query loop, each item reads its own post.
+    await visit(page, '/');
+    await expect(page.locator('main .buzz-index-list > li').filter({ hasText: `Long read ${tag}` })).toContainText('4 min read');
+    await expect(page.locator('main .buzz-index-list > li').filter({ hasText: `Headline ${tag}` })).toContainText('1 min read');
 });
 
 test('a page renders its title and body', async ({ page }) => {

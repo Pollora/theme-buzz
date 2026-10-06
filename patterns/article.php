@@ -23,6 +23,14 @@
             <!-- /wp:paragraph -->
 
             <!-- wp:post-date /-->
+
+            <!-- wp:paragraph {"fontSize":"caption"} -->
+            <p class="has-caption-font-size">&middot;</p>
+            <!-- /wp:paragraph -->
+
+            <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"%theme_name%/article","args":{"field":"reading_time"}}}},"fontSize":"caption"} -->
+            <p class="has-caption-font-size">Reading time</p>
+            <!-- /wp:paragraph -->
         </div>
         <!-- /wp:group -->
     </div>
