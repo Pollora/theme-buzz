@@ -55,7 +55,9 @@ buzz/
 ├── resources/assets/
 │   ├── css/app.css        # @theme static tokens (colour only — see below) + the few hand-authored rules
 │   └── fonts/              # Self-hosted Playfair Display + Source Serif 4 (OFL, Google Fonts, latin subset)
-└── app/Providers/AssetServiceProvider.php
+└── app/
+    ├── Cms/Bindings/ArticleBinding.php  # Block Bindings source: the byline's reading time
+    └── Providers/AssetServiceProvider.php
 ```
 
 One rule decides where a file goes: **the theme root holds what WordPress reads itself**
@@ -67,6 +69,12 @@ docblock (`Title`, `Slug`, `Categories`…). Most of Buzz's patterns are, since 
 (`post-title`, `post-content`, `post-terms`…) do the work themselves. A pattern that needs Laravel
 — the colophon's year, here — is a Blade view in `resources/views/patterns/*.blade.php`, registered
 by Pollora.
+
+The byline's reading time ("4 min read", in the article and in the index) is a plain
+`core/paragraph` bound to the theme's own [Block Bindings](https://pollora.dev/blocks/block-bindings/)
+source, `app/Cms/Bindings/ArticleBinding.php` (`%theme_name%/article`, fields `reading_time` and
+`word_count`): a PHP method computes it from the post's words, in a query loop for each post, and
+the editor shows it too. Add a field to the class, and it is offered in the block's "Attributes" panel.
 
 WordPress caches the list of a theme's `patterns/` files: a new file shows up once that cache is
 cleared (`wp eval 'wp_get_theme()->delete_pattern_cache();'`), or at once with
