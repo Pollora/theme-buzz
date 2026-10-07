@@ -19,9 +19,31 @@ TARGET="$(cd "$(dirname "$0")/.." && pwd)"
 [ -d "$SOURCE" ] || { echo "Not a directory: $SOURCE"; exit 1; }
 
 rsync -a --delete \
-    --exclude='.git' --exclude='.github' --exclude='bin/' \
+    --exclude='.git' --exclude='/.github/' --exclude='bin/' \
     --exclude='node_modules' --exclude='package-lock.json' \
+    --exclude='/README.md' --exclude='/LICENSE' --exclude='/license.txt' \
     "$SOURCE/" "$TARGET/"
+
+# package.json comes from the development copy, which declares no license (or
+# another one): the template's is MIT, the same as LICENSE.
+echo "Setting the package.json license to MIT..."
+node -e '
+const fs = require("fs");
+const [file, license] = process.argv.slice(1);
+const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+let out = pkg;
+if ("license" in pkg) {
+    pkg.license = license;
+} else {
+    out = {};
+    for (const [key, value] of Object.entries(pkg)) {
+        out[key] = value;
+        if (key === "private") out.license = license;
+    }
+    if (!("license" in out)) out.license = license;
+}
+fs.writeFileSync(file, JSON.stringify(out, null, 4) + "\n");
+' "$TARGET/package.json" "MIT"
 
 find "$TARGET" -type f \
     -not -path "*/.git/*" -not -path "*/bin/*" -not -path "*/.github/*" \
