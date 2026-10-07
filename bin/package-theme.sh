@@ -55,6 +55,7 @@ find "$TARGET" -type f \
             -e 's|buzz/|%theme_name%/|g' \
             -e "s|'name' => 'buzz'|'name' => '%theme_name%'|g" \
             -e "s|'label' => 'buzz'|'label' => '%theme_name%'|g" \
+            -e "s|, 'buzz')|, '%theme_name%')|g" \
             "$file"
     done
 
