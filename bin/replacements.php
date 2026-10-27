@@ -9,7 +9,7 @@ declare(strict_types=1);
  * bin/ci/install.php, which substitutes them in the commit under test so CI
  * measures the theme as a user receives it, not the template.
  *
- * @return array<string, string>  placeholder => a plausible substituted value
+ * @return array<string, string> placeholder => a plausible substituted value
  */
 function scaffolderReplacements(string $slug = 'my-theme'): array
 {
